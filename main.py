@@ -13,26 +13,6 @@ import time
 import threading
 import json
 
-class MonThread (threading.Thread):
-    def __init__(self, bot):      # jusqua = donnée supplémentaire
-        threading.Thread.__init__(self)  # ne pas oublier cette ligne
-        # (appel au constructeur de la classe mère)
-        self.bot = bot           # donnée supplémentaire ajoutée à la classe
-
-    async def run(self):
-        while True:
-            try:
-                a_file = open("./json/delivery.json", "r")
-                json_object = json.load(a_file)
-                for id in list(json_object):
-                    for link in list(json_object.get(id)):
-                        events=scraper.get(link).get("events")
-                        if events.get(list(events)[0]) != json_object.get(id).get(link):
-                            json_manager.update("./json/delivery.json", id, {link: list(events.values())[0]})
-                            await self.bot.send_message(bot.get_user(id),list(events.values())[0])
-            except:
-                pass
-
 token=json_manager.get(json_manager.config_file_uri, "token")
 prefix=json_manager.get(json_manager.config_file_uri, "prefix")
 
@@ -46,13 +26,6 @@ else:
     @bot.event
     async def on_ready():
         print("Bot Started !")
-        #m = MonThread(bot) 
-        for i in ["280098063643705345"]:
-            print(bot.get_guild("809141687979999252"))#json_manager.get("./json/config.json", "guild_id")))#.get_member(i))
-            if i.id == "280098063643705345":
-                print(i)
-                await i.create_dm()
-                await i.dm_channel.send("ss")
 
     @bot.command()
     async def load(ctx, name=None):
@@ -80,9 +53,29 @@ else:
                 print(name, "has been loaded")
                 await ctx.send(str(name + " has been loaded"))
 
-    for file in os.listdir("./commands"):
-        if file.endswith(".py"):
-            bot.load_extension(f'commands.{file[:-3]}')
-            print(file, "has been loaded")
+    for file in ['get', "set"]:
+        bot.load_extension('commands.{}'.format(file))
+        print(file, "has been loaded")
 
+    async def scan():
+        while True:
+            await bot.wait_until_ready()
+            file=json_manager.curent_file("./json/delivery.json")
+            for url in file:
+                print("dfssd")
+                last_event = list(scraper.get(url).get("events").values())[0]
+                if last_event == "Colis livré au destinataire":
+                    await bot.get_channel(json_manager.get(json_manager.config_file_uri, "relais_channel_id")).send("formidable ! "+file.get(url).get("name")+"viens d'arriver")
+                    dict_without_it=json_manager.curent_file("./json/delivery.json")
+                    del dict_without_it[url]
+                    a_file = open("./json/delivery.json", "w")
+                    json.dump(dict_without_it, a_file, indent = 4)  
+                    a_file.close()
+                else:
+                    if not file.get(url).get("last_event") == last_event:
+                        await bot.get_channel(json_manager.get(json_manager.config_file_uri, "relais_channel_id")).send(file.get(url).get("name")+"```\n"+last_event+"```")
+                        json_manager.update("./json/delivery.json", url, {"author": file.get(url).get("author"), "name": file.get(url).get("name"), "last_event": last_event})
+            await asyncio.sleep(100)
+
+    bot.loop.create_task(scan())
     bot.run(token)

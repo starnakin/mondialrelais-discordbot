@@ -8,7 +8,7 @@ if not path.exists(config_file_uri):
     json.dump({"token": "", 
                 "prefix": "",
                 "activity": "",
-                "activity_type": ""}, "")
+                "activity_type": ""})
     file.close()
     print("config file has been generate !")
 

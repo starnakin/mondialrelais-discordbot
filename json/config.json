@@ -1,8 +1,9 @@
 
 {
-    "token": "NDkyOTgxMzcwMDg0MzkyOTYw.W6YCrQ._JI6BuJrHcHYLOzI6Ecl4oG3m9c",
+    "token": "TOKEN",
     "prefix": "?",
     "activity": "&",
     "activity_type": "play",
-    "guild_id": "809141687979999252"
+    "guild_id": 809141687979999252,
+    "relais_channel_id": 836653508476141608
 }

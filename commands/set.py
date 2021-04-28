@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands
+import asyncio
 
 import uuid
 import json
 
-import scraper
 import json_manager
+import scraper
 
 def setup(bot):
     bot.add_cog(Set(bot))
@@ -15,8 +16,6 @@ class Set(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def set(self, ctx, arg1, arg2=None):
-        if arg2==None:
-            pass
-
-        json_manager.update("./json/delivery.json", ctx.author.id, {arg1: list(scraper.get(arg1).get("events").values())[0]})
+    async def set(self, ctx, arg0, arg1):
+        url = (arg0, arg1)[arg1.find("mondialrelay.fr/suivi-de-colis/?NumeroExpedition=")>=0]
+        await ctx.send(url)
